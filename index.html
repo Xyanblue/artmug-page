@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>작가님 포트폴리오 & 커미션</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    
+    <style>
+        /* 기본 설정 */
+        html { scroll-behavior: smooth; }
+        body { background-color: transparent; font-family: 'Pretendard', sans-serif; color: #111; margin: 0; padding: 20px 0; display: flex; justify-content: center; }
+
+        /* 전체 콘텐츠 중앙 정렬 박스 (아트머그 가로폭 820px에 최적화) */
+        .main-wrapper { width: 100%; max-width: 820px; display: flex; flex-direction: column; gap: 40px; margin: 0 auto; }
+
+        /* 상단 네비게이션 바 */
+        .top-nav { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; background: #fff; padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 10px; border: 1px solid #eee; }
+        .top-nav a { text-decoration: none; color: #555; font-weight: 800; font-size: 0.95rem; padding: 8px 16px; border-radius: 20px; background: #f8f9fa; transition: 0.2s; }
+        .top-nav a:hover { background: #5e35b1; color: #fff; }
+
+        /* 만능 배너 & 텍스트 박스 디자인 */
+        .section-box { background-color: #fff; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); padding: 40px; box-sizing: border-box; }
+        .sec-header { margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px;}
+        .sec-header .sec-tag { background-color: #f4ebff; color: #5e35b1; padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 0.85rem; display: inline-block; margin-bottom: 8px; }
+        .sec-header .sec-title { font-size: 1.8rem; font-weight: 900; margin: 0; letter-spacing: -0.03em; }
+        .sec-content { font-size: 1rem; color: #444; line-height: 1.6; }
+
+        /* 상호 이동 & 맨 위로 버튼 */
+        .jump-btn { background-color: #f8f9fa; color: #333; border: 1px solid #ddd; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; text-decoration: none; transition: 0.2s; cursor: pointer; display: inline-block; }
+        .jump-btn:hover { background-color: #5e35b1; color: #fff; border-color: #5e35b1; }
+        .top-btn { font-size: 0.85rem; color: #888; text-decoration: none; font-weight: 700; }
+        .top-btn:hover { color: #5e35b1; }
+
+        /* 포트폴리오 (영상) */
+        .video-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .video-item { text-decoration: none; color: #111; display: flex; flex-direction: column; gap: 10px; transition: 0.2s; }
+        .video-item:hover { transform: translateY(-5px); }
+        .video-thumb { width: 100%; aspect-ratio: 16/9; background-color: #ddd; border-radius: 12px; background-size: cover; background-position: center; display: flex; justify-content: center; align-items: center; }
+        .play-icon { width: 40px; height: 40px; background: rgba(0,0,0,0.6); color: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; }
+        .video-title { font-weight: 800; font-size: 0.95rem; margin: 0; text-align: center; }
+        
+        /* 📌 포트폴리오 (개인작 이미지 갤러리) - 이미지 그리드 3열 설정 */
+        .img-grid-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .grid-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .img-item {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f4f4f4;
+        }
+
+        .img-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .img-item:hover img { transform: scale(1.03); } /* 살짝 확대되는 효과 */
+        
+        .loading-msg { text-align: center; color: #888; font-weight: 700; padding: 20px; width: 100%; grid-column: 1 / -1; }
+
+        /* 작업 전 안내 */
+        .notice-center-header { text-align: center; margin-bottom: 25px; }
+        .notice-center-header .tag { color: #7b61ff; font-weight: 900; font-size: 0.9rem; letter-spacing: 0.05em; }
+        .notice-center-header h2 { font-size: 1.8rem; font-weight: 900; margin: 5px 0 10px 0; letter-spacing: -0.03em; }
+        .notice-center-header p { color: #666; font-size: 0.95rem; margin: 0; font-weight: 600; }
+        .table-footer-note { background-color: #f4effc; color: #555; font-weight: 700; text-align: left; padding: 15px; border-radius: 12px; font-size: 0.9rem; }
+
+        /* 작업 프로세스 타임라인 */
+        .process-banner { background: #C9B5FC; background: linear-gradient(0deg, rgba(201, 181, 252, 1) 0%, rgba(167, 139, 250, 1) 70%); color: #fff; text-align: center; padding: 25px; border-radius: 16px; margin-top: 50px; margin-bottom: 30px; }
+        .process-banner h3 { margin: 0 0 5px 0; font-size: 1.5rem; font-weight: 900; }
+        .process-banner p { margin: 0; font-size: 0.95rem; opacity: 0.9; }
+        .process-flow { display: flex; justify-content: space-between; align-items: flex-start; position: relative; padding: 0 10px; }
+        .process-flow::before { content: ''; position: absolute; top: 25px; left: 40px; right: 40px; height: 2px; background-color: #d1d5db; z-index: 1; }
+        .step-item { display: flex; flex-direction: column; align-items: center; z-index: 2; width: 14%; gap: 10px; }
+        .step-icon { width: 50px; height: 50px; background-color: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); font-size: 1.2rem; position: relative; }
+        .step-num { position: absolute; top: -5px; left: -5px; background: #8b5cf6; color: #fff; width: 20px; height: 20px; border-radius: 50%; font-size: 0.7rem; font-weight: 900; display: flex; justify-content: center; align-items: center; border: 2px solid #fff; }
+        .step-text { text-align: center; font-size: 0.85rem; font-weight: 800; color: #444; line-height: 1.4; word-break: keep-all; }
+        .step-text span { color: #8b5cf6; display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 2px; }
+        @media (max-width: 700px) { .process-flow { flex-direction: column; align-items: center; gap: 20px; } .process-flow::before { display: none; } .step-item { width: 100%; flex-direction: row; gap: 15px; } .step-text { text-align: left; } }
+
+        /* 신청폼 셋팅 */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .input-box { display: flex; flex-direction: column; }
+        .input-box label { font-size: 0.9rem; color: #555; font-weight: 700; margin-bottom: 8px; }
+        .input-box input, .input-box select, .input-box textarea { width: 100%; padding: 15px; border: 1px solid #e1e1e1; border-radius: 8px; font-size: 0.95rem; font-family: inherit; outline: none; box-sizing: border-box; }
+        .input-box input:focus, .input-box textarea:focus { border-color: #5e35b1; }
+        .btn-submit { background-color: #5e35b1; color: #fff; border: none; padding: 15px 30px; border-radius: 8px; font-weight: 800; font-size: 1rem; cursor: pointer; }
+        .btn-reset { background-color: #f1f3f5; color: #495057; border: none; padding: 15px 30px; border-radius: 8px; font-weight: 800; font-size: 1rem; cursor: pointer; }
+
+        /* 주의사항 하단 */
+        .notice-bottom-box { background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 16px; padding: 30px; }
+        .notice-bottom-box ul { margin: 0; padding-left: 20px; color: #444; font-size: 0.95rem; line-height: 1.8; }
+        .notice-bottom-box ul li { margin-bottom: 10px; font-weight: 600; }
+        .notice-bottom-box ul li::marker { color: #5e35b1; }
+    </style>
+</head>
+<body id="top">
+
+<div class="main-wrapper">
+
+    <div class="logo-box">
+        <img src="logo.png" style="width: 100%;height: 200px;object-fit: contain;">
+    </div>
+
+    <nav class="top-nav">
+        <a href="#intro">작가소개</a>
+        <a href="#portfolio-com">의뢰작(영상)</a>
+        <a href="#portfolio-per">개인작(일러)</a>
+        <a href="#notice-process">작업안내</a>
+        <a href="#commission-form">신청양식</a>
+        <a href="#notice-bottom">안내사항</a>
+    </nav>
+
+    <section class="section-box" id="intro">
+        <div class="sec-header">
+            <div><span class="sec-tag">● PROFILE</span><h2 class="sec-title">작가 소개 및 경력사항</h2></div>
+            <a href="#top" class="top-btn">▲ 맨 위로</a>
+        </div>
+        <div class="sec-content">
+            Natris 캐릭터 원화팀<br>
+            Sandbox Network 디자인팀 일러스트레이터<br>
+        </div>
+    </section>
+
+    <section class="section-box" id="portfolio-com">
+        <div class="sec-header">
+            <div><span class="sec-tag">● PORTFOLIO 1</span><h2 class="sec-title">의뢰작 (Commission)</h2></div>
+            <div>
+                <a href="#portfolio-per" class="jump-btn">개인작 보러가기 ▼</a>
+                <a href="#top" class="top-btn" style="margin-left:10px;">▲ 맨 위로</a>
+            </div>
+        </div>
+        <div class="video-grid" id="video-root">
+            <div class="loading-msg">데이터를 불러오는 중입니다... 🔄</div>
+        </div>
+    </section>
+
+    <section class="section-box" id="portfolio-per">
+        <div class="sec-header">
+            <div><span class="sec-tag">● PORTFOLIO 2</span><h2 class="sec-title">개인작 (Personal Work)</h2></div>
+            <div>
+                <a href="#portfolio-com" class="jump-btn">의뢰작 보러가기 ▲</a>
+                <a href="#top" class="top-btn" style="margin-left:10px;">▲ 맨 위로</a>
+            </div>
+        </div>
+        
+        <div class="img-grid-container" id="gallery-root">
+            <div class="loading-msg">이미지를 불러오는 중입니다... 🔄</div>
+        </div>
+    </section>
+
+    <section class="section-box" id="notice-process">
+        <div class="notice-center-header">
+            <span class="tag">● NOTICE</span>
+            <h2>작업 전 안내</h2>
+            <p>컬러 러프 컨펌 단계에서 최대한 조율해드립니다.</p>
+        </div>
+
+        <div class="table-footer-note" style="margin-bottom: 30px;">✦ 일러스트 진행 중 제 판단으로 컨펌이 필요할 시에 신청자분께 연락하여 조율할 수 있습니다.</div>
+        <div class="table-footer-note">✦ 일러스트 작업 후 진행되는 2차 컨펌 단계에서는 구도 및 의상 등 전체적인 수정은 불가하며, 필요시 추가금이 발생합니다. 완성본 전달 후 수정 요청은 추가금이 발생합니다.</div>
+
+        <div class="process-banner">
+            <h3>작업 프로세스</h3>
+            <p>의뢰부터 전달까지 아래 순서로 진행됩니다.</p>
+        </div>
+        <div class="process-flow">
+            <div class="step-item"><div class="step-icon"><div class="step-num">1</div>💬</div><div class="step-text">문의 및 견적</div></div>
+            <div class="step-item"><div class="step-icon"><div class="step-num">2</div>💳</div><div class="step-text">결제</div></div>
+            <div class="step-item"><div class="step-icon"><div class="step-num">3</div>😃</div><div class="step-text">컬러 러프</div></div>
+            <div class="step-item"><div class="step-icon"><div class="step-num">4</div>📝</div><div class="step-text">1차 컨펌</div></div>
+            <div class="step-item"><div class="step-icon"><div class="step-num">5</div>🧩</div><div class="step-text">작업 진행</div></div>
+            <div class="step-item"><div class="step-icon"><div class="step-num">6</div>✅</div><div class="step-text">2차 컨펌</div></div>
+            <div class="step-item"><div class="step-icon"><div class="step-num">7</div>📦</div><div class="step-text">파일 전달</div></div>
+        </div>
+        <div style="text-align: right; margin-top: 20px;"><a href="#top" class="top-btn">▲ 맨 위로</a></div>
+    </section>
+
+    <section class="section-box" id="commission-form">
+        <div class="sec-header">
+            <div><span class="sec-tag">● ORDER</span><h2 class="sec-title">신청 양식</h2></div>
+            <a href="#top" class="top-btn">▲ 맨 위로</a>
+        </div>
+        <div class="sec-content">
+            <p style="margin-top:0; color:#e53935; font-weight:bold;">🖼️ 문의 작성 시 캐릭터 설정 이미지를 꼭 첨부해주세요.</p>
+            <form id="orderForm">
+                <div class="grid-2">
+                    <div class="input-box"><label>1. 활동 닉네임(실명/닉네임/기업명 중 기입 가능)</label><input type="text" id="v_nick" placeholder="닉네임을 입력해주세요."></div>
+                </div>
+                <div class="grid-2">
+                    <div class="input-box"><label>2. 신청 타입</label><input type="text" id="v_type" placeholder="신청하실 타입을 입력해주세요."></div>
+                </div>
+                <div class="input-box" style="margin-bottom:20px;"><label>3. 자료 및 레퍼런스</label><textarea id="v_ref" placeholder="필요 시 제 작업물을 샘플로 첨부하여도 괜찮습니다." style="min-height:80px;"></textarea></div>
+                <div class="input-box" style="margin-bottom:30px;"><label>4. 기타 요구사항</label><textarea id="v_etc" placeholder="작업물 비공개 불가. 특정 날짜 이후 공개와 같은 엠바고 형식은 가능합니다." style="min-height:80px;"></textarea></div>
+                <div style="display:flex; gap:12px;">
+                    <button type="button" class="btn-submit" onclick="copyForm()">양식 복사</button>
+                    <button type="button" class="btn-reset" onclick="resetForm()">초기화</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section class="section-box" id="notice-bottom">
+        <div class="sec-header">
+            <div><span class="sec-tag">● NOTICE</span><h2 class="sec-title">안내사항</h2></div>
+            <a href="#top" class="top-btn">▲ 맨 위로</a>
+        </div>
+        <div class="notice-bottom-box">
+            <ul>
+                <li>모든 작업물은 제 포트폴리오로 사용될 수 있습니다.</li>
+                <li>작업 소요 기간은 결제 후 최대 30일입니다.</li>
+                <li>작업 난이도에 따라 추가금이 발생할 수 있습니다.</li>
+                <li>작업물은 기본 세로 3000px, 해상도 72dpi로 작업하여 png 파일로 전달해드립니다.<br/>신청시에 작업 사이즈 및 해상도, 확장자 변경 요청 가능합니다.<br/>인쇄용 의뢰의 경우 300dpi 작업이 가능하니 문의 부탁드립니다.</li>
+                <li>작업물의 AI 학습 및 재판매를 금지합니다.</li>
+            </ul>
+        </div>
+    </section>
+
+</div>
+
+<script>
+    // 1. 폼 복사 함수
+    function copyForm() {
+        var a1 = document.getElementById('v_nick').value || '-'; var a2 = document.getElementById('v_type').value || '-';
+        var a3 = document.getElementById('v_ref').value || '-'; var a4 = document.getElementById('v_etc').value || '-';
+        var E = '\n';
+        var res = '[신청 양식]' + E + E + '1. 활동 닉네임: ' + a1 + E + '2. 신청 타입: ' + a2 + E + E + '3. 자료 및 레퍼런스: ' + E + a3 + E + E + '4. 기타 요구사항: ' + E + a4;
+        var ta = document.createElement('textarea'); ta.value = res; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        alert('✨ 양식이 성공적으로 복사되었습니다!');
+    }
+    
+    // 2. 초기화 함수
+    function resetForm() { if(confirm('작성 중인 내용을 모두 지우시겠습니까?')) { document.getElementById('orderForm').reset(); } }
+
+    // 3. 상하 스크롤 이동 기능 
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            
+            const targetId = this.getAttribute('href').substring(1);
+            let absoluteOffset = 0;
+            
+            if (targetId === 'top') {
+                absoluteOffset = 0;
+            } else {
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    const rect = targetElement.getBoundingClientRect();
+                    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                    absoluteOffset = rect.top + scrollTop - 20;
+                }
+            }
+
+            window.scrollTo({ top: absoluteOffset, behavior: 'smooth' });
+
+            window.parent.postMessage({
+                type: 'scrollTo',
+                offset: absoluteOffset
+            }, '*');
+        });
+    });
+</script>
+
+ <script>
+     // ===================================================
+    const USER_NAME = 'xyanblue'; 
+    const REPO_NAME = 'artmug-page';
+    // ===================================================
+
+    // 유튜브 ID 추출 로직
+    function getVid(url) {
+        const reg = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const m = url.match(reg);
+        return (m && m[2].length === 11) ? m[2] : null;
+    }
+
+    function openImageViewer(url, title) {
+        const newWindow = window.open();
+        newWindow.document.write(`
+            <html>
+                <head>
+                    <title>${title} - 원본 보기</title>
+                    <style>
+                        body { 
+                            margin: 0; 
+                            background-color: #000; 
+                            display: flex; 
+                            align-items: center; 
+                            justify-content: center; 
+                            height: 100vh; 
+                            overflow: hidden;
+                        }
+                        img { 
+                            max-width: 100%; 
+                            max-height: 100%; 
+                            object-fit: contain; 
+                            cursor: zoom-out;
+                            animation: fadeIn 0.3s ease-in-out;
+                        }
+                        @keyframes fadeIn {
+                            from { opacity: 0; transform: scale(0.95); }
+                            to { opacity: 1; transform: scale(1); }
+                        }
+                    </style>
+                </head>
+                <body onclick="window.close()">
+                    <img src="${url}" alt="${title}">
+                </body>
+            </html>
+        `);
+        newWindow.document.close();
+    }
+
+    // GitHub API를 통해 데이터를 직접 불러오는 함수
+    async function renderContents(folder, targetId, isVideo = false) {
+        const root = document.getElementById(targetId);
+        try {
+            const listRes = await fetch(`https://api.github.com/repos/${USER_NAME}/${REPO_NAME}/contents/content/${folder}`);
+            if (!listRes.ok) throw new Error('폴더를 찾을 수 없습니다.');
+            
+            const files = await listRes.json();
+            const jsonFiles = files.filter(f => f.name.endsWith('.json'));
+            
+            root.innerHTML = ''; 
+
+            if (!isVideo) {
+                const cols = [
+                    document.createElement('div'),
+                    document.createElement('div'),
+                    document.createElement('div')
+                ];
+                cols.forEach(col => {
+                    col.className = 'grid-column';
+                    root.appendChild(col);
+                });
+
+                for (const f of jsonFiles) {
+                    const dataRes = await fetch(f.download_url);
+                    const item = await dataRes.json();
+                    
+                    const githubRawBase = `https://raw.githubusercontent.com/${USER_NAME}/${REPO_NAME}/main`;
+                    const imageSrc = item.image.startsWith('http') ? item.image : `${githubRawBase}${item.image}`;
+
+                    const imgItem = document.createElement('div');
+                    imgItem.className = 'img-item';
+                    imgItem.innerHTML = `
+                        <a href="javascript:void(0);" onclick="openImageViewer('${imageSrc}', '${item.title}')" style="display:block;">
+                            <img src="${imageSrc}" alt="${item.title}" style="width:100%; display:block;">
+                        </a>`;
+
+                    const imgTag = imgItem.querySelector('img');
+
+                    await new Promise((resolve) => {
+                        imgTag.onload = () => {
+                            const shortestCol = cols.reduce((prev, curr) => 
+                                prev.offsetHeight <= curr.offsetHeight ? prev : curr
+                            );
+                            shortestCol.appendChild(imgItem);
+                            resolve();
+                        };
+                        
+                        imgTag.onerror = resolve;
+
+                        if (imgTag.complete) imgTag.onload();
+                    });
+                }
+            } else {
+                for (const f of jsonFiles) {
+                    const dataRes = await fetch(f.download_url);
+                    const item = await dataRes.json();
+                    const vId = getVid(item.url);
+                    const thumbUrl = `https://img.youtube.com/vi/${vId}/maxresdefault.jpg`;
+
+                    root.innerHTML += `
+                        <a href="${item.url}" target="_blank" class="video-item">
+                            <div class="video-thumb" style="background-image: url('${thumbUrl}');">
+                                <div class="play-icon">▶</div>
+                            </div>
+                            <p class="video-title">${item.title}</p>
+                        </a>`;
+                }
+            }
+        } catch (err) {
+            console.error(err);
+            root.innerHTML = '<p class="loading-msg">데이터를 불러오는 중 오류가 발생했습니다.</p>';
+        }
+    }
+
+    // 초기 구동
+    window.onload = () => {
+        renderContents('gallery', 'gallery-root');
+        renderContents('videos', 'video-root', true);
+    };
+
+    const resizeObserver = new ResizeObserver(() => {
+        const height = document.documentElement.scrollHeight;
+        
+        window.parent.postMessage({
+            type: 'setHeight',
+            height: height
+        }, '*');
+    });
+
+    resizeObserver.observe(document.body);
+
+    // Identity 설정 (초대 수락용)
+    if (window.netlifyIdentity) {
+        window.netlifyIdentity.on("init", user => {
+            if (!user) {
+                window.netlifyIdentity.on("login", () => { document.location.href = "/admin/"; });
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

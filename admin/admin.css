@@ -1,0 +1,16 @@
+.nc-appBar-appBar {
+  background-color: #5e35b1 !important;
+}
+
+.nc-app-sidebar-link-active {
+  color: #5e35b1 !important;
+  border-left-color: #5e35b1 !important;
+}
+
+.nc-appBar-menuButton {
+  border-radius: 8px !important;
+}
+
+body {
+  font-family: 'Pretendard', sans-serif !important;
+}

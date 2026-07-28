@@ -42,20 +42,24 @@
         .video-title { font-weight: 800; font-size: 0.95rem; margin: 0; text-align: center; }
         
         /* 📌 포트폴리오 (개인작 이미지 갤러리) */
+        .illustration-group + .illustration-group { margin-top: 40px; }
+        .illustration-group-title {
+            display: table;
+            margin: 0 auto 16px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            background-color: #f1eaff;
+            color: #6d28d9;
+            font-size: 1.15rem;
+            font-weight: 900;
+        }
         .img-grid-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 15px;
+            display: grid;
+            gap: 20px;
             width: 100%;
         }
-
-        .grid-column {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
+        .vertical-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .horizontal-grid { grid-template-columns: minmax(0, 1fr); }
 
         .img-item {
             width: 100%;
@@ -109,6 +113,11 @@
         .notice-bottom-box ul { margin: 0; padding-left: 20px; color: #444; font-size: 0.95rem; line-height: 1.8; }
         .notice-bottom-box ul li { margin-bottom: 10px; font-weight: 600; }
         .notice-bottom-box ul li::marker { color: #5e35b1; }
+
+        @media (max-width: 520px) {
+            .section-box { padding: 24px 20px; }
+            .vertical-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body id="top">
@@ -161,8 +170,17 @@
             </div>
         </div>
         
-        <div class="img-grid-container" id="gallery-root">
-            <div class="loading-msg">이미지를 불러오는 중입니다... 🔄</div>
+        <div id="gallery-root">
+            <div class="illustration-group">
+                <h3 class="illustration-group-title">세로형 일러스트</h3>
+                <div class="img-grid-container vertical-grid" id="vertical-gallery-root">
+                    <div class="loading-msg">이미지를 불러오는 중입니다</div>
+                </div>
+            </div>
+            <div class="illustration-group">
+                <h3 class="illustration-group-title">가로형 일러스트</h3>
+                <div class="img-grid-container horizontal-grid" id="horizontal-gallery-root"></div>
+            </div>
         </div>
     </section>
 
@@ -279,8 +297,9 @@
 
  <script>
      // ===================================================
-    const USER_NAME = 'xyanblue'; 
+    const USER_NAME = 'xyanblue';
     const REPO_NAME = 'artmug-page';
+    const isLocalPreview = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
     // ===================================================
 
     // 유튜브 ID 추출 로직
@@ -331,31 +350,32 @@
     async function renderContents(folder, targetId, isVideo = false) {
         const root = document.getElementById(targetId);
         try {
-            const listRes = await fetch(`https://api.github.com/repos/${USER_NAME}/${REPO_NAME}/contents/content/${folder}`);
-            if (!listRes.ok) throw new Error('폴더를 찾을 수 없습니다.');
-            
-            const files = await listRes.json();
-            const jsonFiles = files.filter(f => f.name.endsWith('.json'));
-            
-            root.innerHTML = ''; 
+            let items;
+
+            if (isLocalPreview) {
+                const localRes = await fetch(`data/all-${folder}.json`);
+                if (!localRes.ok) throw new Error('로컬 데이터 파일을 찾을 수 없습니다. node merge-data.js를 실행해주세요.');
+                items = await localRes.json();
+            } else {
+                const listRes = await fetch(`https://api.github.com/repos/${USER_NAME}/${REPO_NAME}/contents/content/${folder}`);
+                if (!listRes.ok) throw new Error('폴더를 찾을 수 없습니다.');
+
+                const files = await listRes.json();
+                const jsonFiles = files.filter(f => f.name.endsWith('.json'));
+                items = await Promise.all(jsonFiles.map(async (file) => {
+                    const dataRes = await fetch(file.download_url);
+                    return dataRes.json();
+                }));
+            }
 
             if (!isVideo) {
-                const cols = [
-                    document.createElement('div'),
-                    document.createElement('div'),
-                    document.createElement('div')
-                ];
-                cols.forEach(col => {
-                    col.className = 'grid-column';
-                    root.appendChild(col);
-                });
-
-                for (const f of jsonFiles) {
-                    const dataRes = await fetch(f.download_url);
-                    const item = await dataRes.json();
-                    
+                const verticalRoot = document.getElementById('vertical-gallery-root');
+                const horizontalRoot = document.getElementById('horizontal-gallery-root');
+                verticalRoot.innerHTML = '';
+                horizontalRoot.innerHTML = '';
+                for (const item of items) {
                     const githubRawBase = `https://raw.githubusercontent.com/${USER_NAME}/${REPO_NAME}/main`;
-                    const imageSrc = item.image.startsWith('http') ? item.image : `${githubRawBase}${item.image}`;
+                    const imageSrc = item.image.startsWith('http') ? item.image : (isLocalPreview ? item.image : `${githubRawBase}${item.image}`);
 
                     const imgItem = document.createElement('div');
                     imgItem.className = 'img-item';
@@ -368,22 +388,23 @@
 
                     await new Promise((resolve) => {
                         imgTag.onload = () => {
-                            const shortestCol = cols.reduce((prev, curr) => 
-                                prev.offsetHeight <= curr.offsetHeight ? prev : curr
-                            );
-                            shortestCol.appendChild(imgItem);
+                            // 관리 화면에서 지정한 방향을 우선 지정
+                            // 가로형의 경우, json에서   "orientation": "horizontal" 추가
+                            // 기존 작품은 세로형으로 표시됩니다.
+                            // TODO: 가로 세로 width height 비율 확인 후 자동 지정
+                            const orientation = item.orientation || 'vertical';
+                            (orientation === 'horizontal' ? horizontalRoot : verticalRoot).appendChild(imgItem);
                             resolve();
                         };
-                        
-                        imgTag.onerror = resolve;
+
+                        imgTag.onerror = () => { verticalRoot.appendChild(imgItem); resolve(); };
 
                         if (imgTag.complete) imgTag.onload();
                     });
                 }
             } else {
-                for (const f of jsonFiles) {
-                    const dataRes = await fetch(f.download_url);
-                    const item = await dataRes.json();
+                root.innerHTML = '';
+                for (const item of items) {
                     const vId = getVid(item.url);
                     const thumbUrl = `https://img.youtube.com/vi/${vId}/maxresdefault.jpg`;
 

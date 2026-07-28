@@ -18,6 +18,13 @@ collections:
     fields:
       - { label: "제목", name: "title", widget: "string" }
       - { label: "작업물 이미지", name: "image", widget: "image" }
+      - label: "일러스트 방향"
+        name: "orientation"
+        widget: "select"
+        options:
+          - { label: "세로형 일러스트", value: "vertical" }
+          - { label: "가로형 일러스트", value: "horizontal" }
+        default: "vertical"
 
   - name: "videos"
     label: "영상 관리"

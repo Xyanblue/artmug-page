@@ -1,4 +1,5 @@
 {
   "title": "말랑찹쌀 게임창고님 장패드",
-  "image": "/images/uploads/장패드-수정본-업로드용.png"
+  "image": "/images/uploads/장패드-수정본-업로드용.png",
+  "orientation": "horizontal"
 }

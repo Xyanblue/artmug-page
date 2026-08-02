@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>작가님 포트폴리오 & 커미션</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css">
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js"></script>
     <style>
         /* 기본 설정 */
         html { scroll-behavior: smooth; }
@@ -58,9 +59,83 @@
             gap: 20px;
             width: 100%;
         }
+        .img-grid-container.gallery-slider-active {
+            display: block;
+        }
         .vertical-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .horizontal-grid { grid-template-columns: minmax(0, 1fr); }
 
+        .gallery-slider {
+            width: 100%;
+        }
+        .gallery-slide-page{
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            align-items: start;  /* 이미지 칸이 늘어나지 않고 실제 높이만큼만 차지 */
+            gap:20px;
+        }
+        .horizontal-grid .gallery-slide-page {
+            grid-template-columns: 1fr;
+        }
+        .gallery-slider-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 18px;
+            margin-top: 24px;
+        }
+        .gallery-slider-button {
+            position: static !important;
+            margin: 0 !important;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            border: 1px solid #ddd;
+            background: #fff;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .gallery-slider-button::before {
+            font-size: 18px;
+            font-weight: 900;
+            color: #8b5cf6;
+            line-height: 1;
+        }
+        .gallery-slider-button.gallery-slider-prev::before { content: '‹'; }
+        .gallery-slider-button.gallery-slider-next::before { content: '›'; }
+        .gallery-slider-button:hover::before { color: #fff; }
+        .gallery-slider-button:hover {
+            background: #8b5cf6;
+            border-color: #8b5cf6;
+        }
+        .gallery-slider-button:hover::before { color: #fff; }
+        .gallery-slider-button.swiper-button-disabled {
+            opacity: 0.35;
+            cursor: default;
+        }
+
+        .gallery-slider-pagination {
+            position: static !important;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: auto !important;
+        }
+        .gallery-slider-pagination .swiper-pagination-bullet {
+            width: 8px;
+            height: 8px;
+            margin: 0 !important;
+            background: #c9b5fc;
+            opacity: 0.5;
+        }
+        .gallery-slider-pagination .swiper-pagination-bullet-active {
+            background: #8b5cf6;
+            opacity: 1;
+        }
+        
         .img-item {
             width: 100%;
             border-radius: 12px;
@@ -302,6 +377,12 @@
     const USER_NAME = 'xyanblue';
     const REPO_NAME = 'artmug-page';
     const isLocalPreview = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+    const DEFAULT_GALLERY_DISPLAY = {
+        vertical_display: 'slider',
+        vertical_slides_per_view: 2,
+        horizontal_display: 'slider',
+        horizontal_slides_per_view: 1
+    };
     // ===================================================
 
     // 유튜브 ID 추출 로직
@@ -348,8 +429,89 @@
         newWindow.document.close();
     }
 
+    async function loadGallerySettings() {
+        try {
+            let data;
+            if (isLocalPreview) {
+                const res = await fetch('content/gallery-settings.json');
+                if (!res.ok) throw new Error('로컬 설정 파일을 찾을 수 없습니다.');
+                data = await res.json();
+            } else {
+                const rawUrl = `https://raw.githubusercontent.com/${USER_NAME}/${REPO_NAME}/main/content/gallery-settings.json`;
+                const res = await fetch(rawUrl);
+                if (!res.ok) throw new Error('설정 파일을 찾을 수 없습니다.');
+                data = await res.json();
+            }
+            return { ...DEFAULT_GALLERY_DISPLAY, ...data };
+        } catch (err) {
+            console.error('갤러리 설정 로드 실패, 기본값 사용:', err);
+            return DEFAULT_GALLERY_DISPLAY;
+        }
+    }
+
+    function createGallerySlider(root, perPage) {
+        const items = Array.from(root.querySelectorAll('.img-item'));
+        if (!items.length) return;
+
+        perPage = Math.max(1, parseInt(perPage, 10) || 1);
+        if (items.length <= perPage) return; // 개수가 더 적으면 슬라이드 불필요
+
+        root.innerHTML = '';
+        root.classList.add('gallery-slider-active'); // 부모 그리드 해제 → 폭 100% 확보
+
+        const swiperEl = document.createElement('div');
+        swiperEl.className = 'swiper gallery-slider';
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'swiper-wrapper';
+        // slide 생성
+        for (let i = 0; i < items.length; i += perPage) {
+            const pageItems = items.slice(i, i + perPage);
+
+            const slide = document.createElement('div');
+            slide.className = 'swiper-slide';
+
+            const page = document.createElement('div');
+            page.className = 'gallery-slide-page';
+            page.style.gridTemplateColumns = `repeat(${pageItems.length}, 1fr)`;
+
+            pageItems.forEach(item => page.appendChild(item));
+            slide.appendChild(page);
+            wrapper.appendChild(slide);
+        }
+
+        swiperEl.appendChild(wrapper);
+        root.appendChild(swiperEl);
+
+        // 컨트롤(버튼+페이지네이션)을 별도로 분리하고 커스텀 클래스 부착
+        const controls = document.createElement('div');
+        controls.className = 'gallery-slider-controls';
+
+        const prev = document.createElement('div');
+        prev.className = 'gallery-slider-button gallery-slider-prev';
+
+        const next = document.createElement('div');
+        next.className = 'gallery-slider-button gallery-slider-next';
+
+        const pagination = document.createElement('div');
+        pagination.className = 'gallery-slider-pagination';
+
+        controls.appendChild(prev);
+        controls.appendChild(pagination);
+        controls.appendChild(next);
+        root.appendChild(controls);
+
+        new Swiper(swiperEl, {
+            slidesPerView: 1,
+            spaceBetween: 20,
+            autoHeight: true,
+            navigation: { prevEl: prev, nextEl: next },
+            pagination: { el: pagination, clickable: true }
+        });
+    }
+
     // GitHub API를 통해 데이터를 직접 불러오는 함수
-    async function renderContents(folder, targetId, isVideo = false) {
+    async function renderContents(folder, targetId, isVideo = false, gallerySettings = DEFAULT_GALLERY_DISPLAY) {
         const root = document.getElementById(targetId);
         try {
             let items;
@@ -394,7 +556,7 @@
                             // 가로형의 경우, json에서   "orientation": "horizontal" 추가
                             // 기존 작품은 세로형으로 표시됩니다.
                             // TODO: 가로 세로 width height 비율 확인 후 자동 지정
-                            const orientation = item.orientation || 'vertical';
+                            const orientation =  (item.orientation || 'vertical').toLowerCase();
                             (orientation === 'horizontal' ? horizontalRoot : verticalRoot).appendChild(imgItem);
                             resolve();
                         };
@@ -404,6 +566,9 @@
                         if (imgTag.complete) imgTag.onload();
                     });
                 }
+
+                if (gallerySettings.vertical_display === 'slider') createGallerySlider(verticalRoot, gallerySettings.vertical_slides_per_view);
+                if (gallerySettings.horizontal_display === 'slider') createGallerySlider(horizontalRoot, gallerySettings.horizontal_slides_per_view);
             } else {
                 root.innerHTML = '';
                 for (const item of items) {
@@ -426,8 +591,9 @@
     }
 
     // 초기 구동
-    window.onload = () => {
-        renderContents('gallery', 'gallery-root');
+    window.onload = async () => {
+        const gallerySettings = await loadGallerySettings();
+        renderContents('gallery', 'gallery-root', false, gallerySettings);
         renderContents('videos', 'video-root', true);
     };
 

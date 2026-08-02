@@ -26,6 +26,43 @@ collections:
           - { label: "가로형 일러스트", value: "horizontal" }
         default: "vertical"
 
+  - name: "gallery_settings"
+    label: "일러스트 표시 설정"
+    files:
+      - name: "gallery_display"
+        label: "일러스트 표시 방식"
+        file: "content/gallery-settings.json"
+        fields:
+          - label: "세로형 일러스트 표시 방식"
+            name: "vertical_display"
+            widget: "select"
+            options:
+              - { label: "슬라이드", value: "slider" }
+              - { label: "기본 나열", value: "grid" }
+            default: "slider"
+          - label: "세로형 슬라이드 노출 개수"
+            name: "vertical_slides_per_view"
+            widget: "number"
+            value_type: "int"
+            min: 1
+            max: 3
+            default: 2
+            hint: "세로형 표시 방식이 '슬라이드'일 때만 적용됩니다."
+          - label: "가로형 일러스트 표시 방식"
+            name: "horizontal_display"
+            widget: "select"
+            options:
+              - { label: "슬라이드", value: "slider" }
+              - { label: "기본 나열", value: "grid" }
+            default: "slider"
+          - label: "가로형 슬라이드 노출 개수"
+            name: "horizontal_slides_per_view"
+            widget: "number"
+            value_type: "int"
+            min: 1
+            max: 3
+            default: 1
+            hint: "가로형 표시 방식이 '슬라이드'일 때만 적용됩니다."
   - name: "videos"
     label: "영상 관리"
     folder: "content/videos"

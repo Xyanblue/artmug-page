@@ -6,6 +6,7 @@
     <title>작가님 포트폴리오 & 커미션</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spinkit/2.0.1/spinkit.min.css">
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js"></script>
     <style>
@@ -69,6 +70,37 @@
         }
         #gallery-root.gallery-ready {
             opacity: 1;
+        }
+
+        .loading-msg {
+            text-align: center;
+            color: #888;
+            font-weight: 700;
+            padding: 20px;
+            width: 100%;
+            grid-column: 1 / -1;
+        }
+        .loading-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 40px 20px;
+            width: 100%;
+            grid-column: 1 / -1;
+        }
+        .loading-wrap .sk-fold {
+            width: 32px;
+            height: 32px;
+        }
+        .loading-wrap .sk-fold .sk-fold-cube:before {
+            background-color: #8b5cf6;
+        }
+        .loading-wrap .loading-text {
+            color: #888;
+            font-weight: 700;
+            font-size: 0.9rem;
         }
 
         .vertical-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -242,8 +274,19 @@
                 <a href="#top" class="top-btn" style="margin-left:10px;">▲ 맨 위로</a>
             </div>
         </div>
-        <div class="video-grid" id="video-root">
+        <!-- <div class="video-grid" id="video-root">
             <div class="loading-msg">데이터를 불러오는 중입니다...🔄</div>
+        </div> -->
+        <div class="video-grid" id="video-root">
+            <div class="loading-wrap">
+                <div class="sk-fold">
+                    <div class="sk-fold-cube"></div>
+                    <div class="sk-fold-cube"></div>
+                    <div class="sk-fold-cube"></div>
+                    <div class="sk-fold-cube"></div>
+                </div>
+                <span class="loading-text">데이터를 불러오는 중입니다</span>
+            </div>
         </div>
     </section>
 
@@ -259,8 +302,19 @@
         <div id="gallery-root">
             <div class="illustration-group">
                 <h3 class="illustration-group-title">세로형 일러스트</h3>
-                <div class="img-grid-container vertical-grid" id="vertical-gallery-root">
+                <!-- <div class="img-grid-container vertical-grid" id="vertical-gallery-root">
                     <div class="loading-msg">이미지를 불러오는 중입니다...🔄</div>
+                </div> -->
+                <div class="img-grid-container vertical-grid" id="vertical-gallery-root">
+                    <div class="loading-wrap">
+                        <div class="sk-fold">
+                            <div class="sk-fold-cube"></div>
+                            <div class="sk-fold-cube"></div>
+                            <div class="sk-fold-cube"></div>
+                            <div class="sk-fold-cube"></div>
+                        </div>
+                        <span class="loading-text">이미지를 불러오는 중입니다</span>
+                    </div>
                 </div>
             </div>
             <div class="illustration-group">
@@ -400,7 +454,7 @@
         const m = url.match(reg);
         return (m && m[2].length === 11) ? m[2] : null;
     }
-
+    
     function openImageViewer(url, title) {
         const newWindow = window.open();
         newWindow.document.write(`

@@ -62,6 +62,15 @@
         .img-grid-container.gallery-slider-active {
             display: block;
         }
+
+        #gallery-root {
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        #gallery-root.gallery-ready {
+            opacity: 1;
+        }
+
         .vertical-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .horizontal-grid { grid-template-columns: minmax(0, 1fr); }
 
@@ -432,12 +441,13 @@
     async function loadGallerySettings() {
         try {
             let data;
+            const cacheBust = `?t=${Date.now()}`;
             if (isLocalPreview) {
-                const res = await fetch('content/gallery-settings.json');
+                const res = await fetch('content/gallery-settings.json' + cacheBust, { cache: 'no-store' });
                 if (!res.ok) throw new Error('로컬 설정 파일을 찾을 수 없습니다.');
                 data = await res.json();
             } else {
-                const rawUrl = `https://raw.githubusercontent.com/${USER_NAME}/${REPO_NAME}/main/content/gallery-settings.json`;
+                const rawUrl = `https://raw.githubusercontent.com/${USER_NAME}/${REPO_NAME}/main/content/gallery-settings.json${cacheBust}`;
                 const res = await fetch(rawUrl);
                 if (!res.ok) throw new Error('설정 파일을 찾을 수 없습니다.');
                 data = await res.json();
@@ -515,19 +525,23 @@
         const root = document.getElementById(targetId);
         try {
             let items;
+            const cacheBust = `?t=${Date.now()}`;
 
             if (isLocalPreview) {
-                const localRes = await fetch(`data/all-${folder}.json`);
+                const localRes = await fetch(`data/all-${folder}.json${cacheBust}`, { cache: 'no-store' });
                 if (!localRes.ok) throw new Error('로컬 데이터 파일을 찾을 수 없습니다. node merge-data.js를 실행해주세요.');
                 items = await localRes.json();
             } else {
-                const listRes = await fetch(`https://api.github.com/repos/${USER_NAME}/${REPO_NAME}/contents/content/${folder}`);
+                const listRes = await fetch(
+                    `https://api.github.com/repos/${USER_NAME}/${REPO_NAME}/contents/content/${folder}${cacheBust}`,
+                    { cache: 'no-store' }
+                );
                 if (!listRes.ok) throw new Error('폴더를 찾을 수 없습니다.');
 
                 const files = await listRes.json();
                 const jsonFiles = files.filter(f => f.name.endsWith('.json'));
                 items = await Promise.all(jsonFiles.map(async (file) => {
-                    const dataRes = await fetch(file.download_url);
+                    const dataRes = await fetch(file.download_url + cacheBust, { cache: 'no-store' });
                     return dataRes.json();
                 }));
             }
@@ -569,6 +583,8 @@
 
                 if (gallerySettings.vertical_display === 'slider') createGallerySlider(verticalRoot, gallerySettings.vertical_slides_per_view);
                 if (gallerySettings.horizontal_display === 'slider') createGallerySlider(horizontalRoot, gallerySettings.horizontal_slides_per_view);
+
+                document.getElementById('gallery-root').classList.add('gallery-ready'); 
             } else {
                 root.innerHTML = '';
                 for (const item of items) {

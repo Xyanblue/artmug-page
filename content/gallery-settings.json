@@ -1,6 +1,6 @@
 {
   "vertical_display": "slider",
-  "vertical_slides_per_view" : 2,
+  "vertical_slides_per_view": 1,
   "horizontal_display": "slider",
   "horizontal_slides_per_view": 1
 }

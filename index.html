@@ -603,38 +603,48 @@
             if (!isVideo) {
                 const verticalRoot = document.getElementById('vertical-gallery-root');
                 const horizontalRoot = document.getElementById('horizontal-gallery-root');
-                verticalRoot.innerHTML = '';
-                horizontalRoot.innerHTML = '';
-                for (const item of items) {
-                    const githubRawBase = `https://raw.githubusercontent.com/${USER_NAME}/${REPO_NAME}/main`;
-                    const imageSrc = item.image.startsWith('http') ? item.image : (isLocalPreview ? item.image : `${githubRawBase}${item.image}`);
+
+                const githubRawBase = `https://raw.githubusercontent.com/${USER_NAME}/${REPO_NAME}/main`;
+
+                const loadTasks = items.map(item => {
+                    const imageSrc = item.image.startsWith('http')
+                        ? item.image
+                        : (isLocalPreview ? item.image : `${githubRawBase}${item.image}`);
 
                     const imgItem = document.createElement('div');
                     imgItem.className = 'img-item';
-                    imgItem.innerHTML = `
-                        <a href="javascript:void(0);" onclick="openImageViewer('${imageSrc}', '${item.title}')" style="display:block;">
-                            <img src="${imageSrc}" alt="${item.title}" style="width:100%; display:block;">
-                        </a>`;
 
-                    const imgTag = imgItem.querySelector('img');
+                    const link = document.createElement('a');
+                    link.href = 'javascript:void(0);';
+                    link.style.display = 'block';
+                    link.onclick = () => openImageViewer(imageSrc, item.title);
 
-                    await new Promise((resolve) => {
-                        imgTag.onload = () => {
-                            // 관리 화면에서 지정한 방향을 우선 지정
-                            // 가로형의 경우, json에서   "orientation": "horizontal" 추가
-                            // 기존 작품은 세로형으로 표시됩니다.
-                            // TODO: 가로 세로 width height 비율 확인 후 자동 지정
-                            const orientation =  (item.orientation || 'vertical').toLowerCase();
-                            (orientation === 'horizontal' ? horizontalRoot : verticalRoot).appendChild(imgItem);
-                            resolve();
-                        };
+                    const imgTag = document.createElement('img');
+                    imgTag.alt = item.title;
+                    imgTag.style.width = '100%';
+                    imgTag.style.display = 'block';
 
-                        imgTag.onerror = () => { verticalRoot.appendChild(imgItem); resolve(); };
+                    link.appendChild(imgTag);
+                    imgItem.appendChild(link);
 
-                        if (imgTag.complete) imgTag.onload();
+                    const orientation = (item.orientation || 'vertical').toLowerCase();
+
+                    const loadPromise = new Promise((resolve) => {
+                        imgTag.onload = () => resolve();
+                        imgTag.onerror = () => resolve();
+                        imgTag.src = imageSrc;
                     });
-                }
 
+                    return { imgItem, orientation, loadPromise };
+                });
+
+                await Promise.all(loadTasks.map(t => t.loadPromise));
+
+                verticalRoot.innerHTML = '';
+                horizontalRoot.innerHTML = '';
+                loadTasks.forEach(({ imgItem, orientation }) => {
+                    (orientation === 'horizontal' ? horizontalRoot : verticalRoot).appendChild(imgItem);
+                });
                 if (gallerySettings.vertical_display === 'slider') createGallerySlider(verticalRoot, gallerySettings.vertical_slides_per_view);
                 if (gallerySettings.horizontal_display === 'slider') createGallerySlider(horizontalRoot, gallerySettings.horizontal_slides_per_view);
 

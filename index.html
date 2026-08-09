@@ -671,13 +671,25 @@
         renderContents('videos', 'video-root', true);
     };
 
-    const resizeObserver = new ResizeObserver(() => {
+    // resizeObserver 수정 ==> 브라우저가 레이아웃 계산 후 콜백
+
+    let rafPending = false;
+    let lastSentHeight = null;
+
+    function sendHeightIfChanged() {
         const height = document.documentElement.scrollHeight;
-        
-        window.parent.postMessage({
-            type: 'setHeight',
-            height: height
-        }, '*');
+        if (height !== lastSentHeight) {
+            lastSentHeight = height;
+            window.parent.postMessage({ type: 'setHeight', height: height }, '*');
+        }
+        rafPending = false;
+    }
+
+    const resizeObserver = new ResizeObserver(() => {
+        if (!rafPending) {
+            rafPending = true;
+            requestAnimationFrame(sendHeightIfChanged);
+        }
     });
 
     resizeObserver.observe(document.body);

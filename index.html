@@ -495,13 +495,12 @@
     async function loadGallerySettings() {
         try {
             let data;
-            const cacheBust = `?t=${Date.now()}`;
             if (isLocalPreview) {
-                const res = await fetch('content/gallery-settings.json' + cacheBust, { cache: 'no-store' });
+                const res = await fetch('content/gallery-settings.json');
                 if (!res.ok) throw new Error('로컬 설정 파일을 찾을 수 없습니다.');
                 data = await res.json();
             } else {
-                const rawUrl = `https://raw.githubusercontent.com/${USER_NAME}/${REPO_NAME}/main/content/gallery-settings.json${cacheBust}`;
+                const rawUrl = `https://raw.githubusercontent.com/${USER_NAME}/${REPO_NAME}/main/content/gallery-settings.json`;
                 const res = await fetch(rawUrl);
                 if (!res.ok) throw new Error('설정 파일을 찾을 수 없습니다.');
                 data = await res.json();
@@ -579,23 +578,18 @@
         const root = document.getElementById(targetId);
         try {
             let items;
-            const cacheBust = `?t=${Date.now()}`;
-
             if (isLocalPreview) {
-                const localRes = await fetch(`data/all-${folder}.json${cacheBust}`, { cache: 'no-store' });
+                const localRes = await fetch(`data/all-${folder}.json`);
                 if (!localRes.ok) throw new Error('로컬 데이터 파일을 찾을 수 없습니다. node merge-data.js를 실행해주세요.');
                 items = await localRes.json();
             } else {
-                const listRes = await fetch(
-                    `https://api.github.com/repos/${USER_NAME}/${REPO_NAME}/contents/content/${folder}${cacheBust}`,
-                    { cache: 'no-store' }
-                );
+                const listRes = await fetch(`https://api.github.com/repos/${USER_NAME}/${REPO_NAME}/contents/content/${folder}`);
                 if (!listRes.ok) throw new Error('폴더를 찾을 수 없습니다.');
 
                 const files = await listRes.json();
                 const jsonFiles = files.filter(f => f.name.endsWith('.json'));
                 items = await Promise.all(jsonFiles.map(async (file) => {
-                    const dataRes = await fetch(file.download_url + cacheBust, { cache: 'no-store' });
+                    const dataRes = await fetch(file.download_url);
                     return dataRes.json();
                 }));
             }

@@ -571,6 +571,8 @@
             navigation: { prevEl: prev, nextEl: next },
             pagination: { el: pagination, clickable: true }
         });
+
+        requestAnimationFrame(sendHeightIfChanged);
     }
 
     // GitHub API를 통해 데이터를 직접 불러오는 함수
@@ -642,7 +644,8 @@
                 if (gallerySettings.vertical_display === 'slider') createGallerySlider(verticalRoot, gallerySettings.vertical_slides_per_view);
                 if (gallerySettings.horizontal_display === 'slider') createGallerySlider(horizontalRoot, gallerySettings.horizontal_slides_per_view);
 
-                document.getElementById('gallery-root').classList.add('gallery-ready'); 
+                document.getElementById('gallery-root').classList.add('gallery-ready');
+                requestAnimationFrame(sendHeightIfChanged);
             } else {
                 root.innerHTML = '';
                 for (const item of items) {

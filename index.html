@@ -517,7 +517,7 @@
         if (!items.length) return;
 
         perPage = Math.max(1, parseInt(perPage, 10) || 1);
-        if (items.length <= perPage) return; // 개수가 더 적으면 슬라이드 불필요
+        if (items.length <= perPage) return;
 
         root.innerHTML = '';
         root.classList.add('gallery-slider-active'); // 부모 그리드 해제 → 폭 100% 확보
@@ -567,7 +567,7 @@
         new Swiper(swiperEl, {
             slidesPerView: 1,
             spaceBetween: 20,
-            autoHeight: true,
+            autoHeight: false,
             navigation: { prevEl: prev, nextEl: next },
             pagination: { el: pagination, clickable: true }
         });

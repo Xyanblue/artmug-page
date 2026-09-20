@@ -111,12 +111,12 @@
         }
         .gallery-slide-page{
             display:grid;
-            grid-template-columns:repeat(2,1fr);
-            align-items: start;  /* 이미지 칸이 늘어나지 않고 실제 높이만큼만 차지 */
+            grid-template-columns: repeat(var(--per-page, 2), 1fr);
+            align-items: start;
             gap:20px;
         }
         .horizontal-grid .gallery-slide-page {
-            grid-template-columns: 1fr;
+             grid-template-columns: repeat(var(--per-page, 1), 1fr);
         }
         .gallery-slider-controls {
             display: flex;
@@ -183,9 +183,7 @@
             overflow: hidden;
             background: transparent;
         }
-
-        .vertical-grid .img-item { align-self: center; }
-
+        
         .img-item img {
             width: 100%;
             height: auto;
@@ -536,9 +534,16 @@
 
             const page = document.createElement('div');
             page.className = 'gallery-slide-page';
-            page.style.gridTemplateColumns = `repeat(${pageItems.length}, 1fr)`;
+            page.style.setProperty('--per-page', perPage);
 
             pageItems.forEach(item => page.appendChild(item));
+
+            for (let k = pageItems.length; k < perPage; k++) {
+                const ghost = document.createElement('div');
+                ghost.className = 'img-item is-ghost';
+                page.appendChild(ghost);
+            }
+
             slide.appendChild(page);
             wrapper.appendChild(slide);
         }
@@ -568,6 +573,7 @@
             slidesPerView: 1,
             spaceBetween: 20,
             autoHeight: false,
+            loop: items.length >= perPage * 2,
             navigation: { prevEl: prev, nextEl: next },
             pagination: { el: pagination, clickable: true }
         });

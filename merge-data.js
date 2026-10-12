@@ -12,6 +12,14 @@ function mergeCollection(collectionName) {
     const files = fs.readdirSync(dataDir).filter(file => file.endsWith('.json'));
     const mergedData = files.map(file => JSON.parse(fs.readFileSync(path.join(dataDir, file))));
 
+    if (collectionName === 'gallery') {
+        mergedData.sort((a, b) => {
+            const timeA = Date.parse(a.updated_at) || 0;
+            const timeB = Date.parse(b.updated_at) || 0;
+            return timeB - timeA;
+        });
+    }
+
     fs.writeFileSync(outputFile, JSON.stringify(mergedData));
     console.log(`${collectionName} 병합 완료`);
 }

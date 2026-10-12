@@ -18,6 +18,7 @@ collections:
     fields:
       - { label: "제목", name: "title", widget: "string" }
       - { label: "작업물 이미지", name: "image", widget: "image" }
+      - { label: "마지막 수정 시각", name: "updated_at", widget: "hidden" }
       - label: "일러스트 방향"
         name: "orientation"
         widget: "select"

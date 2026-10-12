@@ -603,6 +603,12 @@
             }
 
             if (!isVideo) {
+                items.sort((a, b) => {
+                    const timeA = Date.parse(a.updated_at) || 0;
+                    const timeB = Date.parse(b.updated_at) || 0;
+                    return timeB - timeA;
+                });
+
                 const verticalRoot = document.getElementById('vertical-gallery-root');
                 const horizontalRoot = document.getElementById('horizontal-gallery-root');
 

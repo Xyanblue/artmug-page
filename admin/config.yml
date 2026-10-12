@@ -18,7 +18,11 @@ collections:
     fields:
       - { label: "제목", name: "title", widget: "string" }
       - { label: "작업물 이미지", name: "image", widget: "image" }
-      - { label: "마지막 수정 시각", name: "updated_at", widget: "hidden" }
+      - label: "마지막 수정 시각"
+        name: "updated_at"
+        widget: "readonly_datetime"
+        default: "{{now}}"
+        hint: "저장할 때 현재 시각으로 자동 갱신됩니다."
       - label: "일러스트 방향"
         name: "orientation"
         widget: "select"

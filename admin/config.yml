@@ -15,6 +15,9 @@ collections:
     extension: "json"
     format: "json"
     slug: "{{slug}}"
+    sortable_fields:
+      fields: ["date", "title"]
+      default: { field: "date", direction: "Descending" }
     fields:
       - { label: "제목", name: "title", widget: "string" }
       - { label: "작업물 이미지", name: "image", widget: "image" }
@@ -25,6 +28,14 @@ collections:
           - { label: "세로형 일러스트", value: "vertical" }
           - { label: "가로형 일러스트", value: "horizontal" }
         default: "vertical"
+      - label: "등록일시 (최신순 정렬 기준)"
+        name: "date"
+        widget: "datetime"
+        format: "YYYY-MM-DDTHH:mm:ss"
+        date_format: "YYYY-MM-DD"
+        time_format: "HH:mm"
+        picker_utc: false
+        hint: "새로 올리면 현재 시각이 자동 입력됩니다. 순서를 바꾸고 싶을 때만 수정하세요."
 
   - name: "gallery_settings"
     label: "일러스트 표시 설정"

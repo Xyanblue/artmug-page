@@ -80,46 +80,29 @@ function initAnchorScroll() {
 }
 
 // ---------- 이미지 원본 보기 (새 창) ----------
-// TODO: document.write -> dom api로 수정 예정
 function openImageViewer(url, title) {
-  const newWindow = window.open();
-  newWindow.document.write(`
-        <html>
-            <head>
-                <title>${title} - 원본 보기</title>
-                <style>
-                    body { 
-                        margin: 0; 
-                        background-color: #000; 
-                        display: flex; 
-                        align-items: center; 
-                        justify-content: center; 
-                        height: 100vh; 
-                        overflow: hidden;
-                    }
-                    img { 
-                        max-width: 100%; 
-                        max-height: 100%; 
-                        object-fit: contain; 
-                        cursor: zoom-out;
-                        animation: fadeIn 0.3s ease-in-out;
-                    }
-                    @keyframes fadeIn {
-                        from { opacity: 0; transform: scale(0.95); }
-                        to { opacity: 1; transform: scale(1); }
-                    }
-                </style>
-            </head>
-            <body onclick="window.close()">
-                <img src="${url}" alt="${title}">
-            </body>
-        </html>
-    `);
-  newWindow.document.close();
+    const newWindow = window.open();
+    if (!newWindow) return;
+    const doc = newWindow.document;
+    doc.title = `${title} - 원본 보기`;
+    const style = doc.createElement("style");
+    style.textContent = `
+            body { margin: 0; background-color: #000; display: flex; align-items: center;
+                justify-content: center; height: 100vh; overflow: hidden; }
+            img { max-width: 100%; max-height: 100%; object-fit: contain; cursor: zoom-out;
+                animation: fadeIn 0.3s ease-in-out; }
+            @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        `;
+    doc.head.appendChild(style);
+
+    const img = doc.createElement("img");
+    img.src = url;
+    img.alt = title;
+    doc.body.appendChild(img);
+    doc.body.onclick = () => newWindow.close();
 }
 
 // ---------- iframe 높이 전달 ----------
-
 let rafPending = false;
 let lastSentHeight = null;
 
@@ -138,7 +121,6 @@ const resizeObserver = new ResizeObserver(() => {
     requestAnimationFrame(sendHeightIfChanged);
   }
 });
-
 resizeObserver.observe(document.body);
 
 // ---------- Netlify Identity (초대 수락용) ----------

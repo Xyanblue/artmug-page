@@ -1,12 +1,6 @@
 {
   "items": [
     {
-      "image": "/images/uploads/260310.png",
-      "title": "드미트리",
-      "updated_at": "2026-10-13T04:15:23.355Z",
-      "orientation": "vertical"
-    },
-    {
       "orientation": "vertical",
       "image": "/images/uploads/260909.png",
       "title": "에이메스 개인작 (2026) ",
@@ -16,6 +10,12 @@
       "image": "/images/uploads/260227.png",
       "title": "이본",
       "updated_at": "2026-10-13T04:15:32.946Z",
+      "orientation": "vertical"
+    },
+    {
+      "image": "/images/uploads/260310.png",
+      "title": "드미트리",
+      "updated_at": "2026-10-13T04:15:23.355Z",
       "orientation": "vertical"
     },
     {

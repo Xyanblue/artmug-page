@@ -106,6 +106,15 @@ body { background-color: transparent; font-family: 'Pretendard', sans-serif; col
 .horizontal-grid .gallery-slide-page {
         grid-template-columns: repeat(var(--per-page, 1), 1fr);
 }
+.vertical-grid .gallery-slider .swiper-slide {
+    height: auto;
+    display: flex;
+    align-items: center;
+}
+.vertical-grid .gallery-slide-page {
+    width: 100%;
+    align-items: center;
+}
 .gallery-slider-controls {
     display: flex;
     justify-content: center;

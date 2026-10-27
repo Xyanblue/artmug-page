@@ -1,2 +1,8 @@
 [build]
-  ignore = "git diff --quiet HEAD^ HEAD -- . ':!content' ':!images'"
+  # Rebuild when CMS content, ordering, or images change as well.
+  ignore = "git diff --quiet HEAD^ HEAD -- ."
+
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

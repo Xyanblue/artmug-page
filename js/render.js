@@ -85,7 +85,8 @@ async function renderContents(folder, targetId, isVideo = false, gallerySettings
         if (!isVideo) {
             const base = isLocalPreview ? 'content' : `https://raw.githubusercontent.com/${USER_NAME}/${REPO_NAME}/main/content`;
             const groups = await Promise.all(['vertical', 'horizontal'].map(async orientation => {
-                const response = await fetch(`${base}/gallery-${orientation}.json`, { cache: 'no-store' });
+                // GitHub's CDN may retain the old response even with no-store.
+                const response = await fetch(`${base}/gallery-${orientation}.json?t=${Date.now()}`, { cache: 'no-store' });
                 if (!response.ok) throw new Error('일러스트 목록을 불러오지 못했습니다.');
                 const data = await response.json();
                 return data.items.map(item => ({ ...item, orientation }));

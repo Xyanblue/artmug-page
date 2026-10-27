@@ -1,0 +1,12 @@
+body { margin: 0; background: #fff; color: #263247; }
+.gallery-preview { padding: 24px 16px; font-family: sans-serif; touch-action: pan-y; }
+.gallery-preview h2 { text-align: center; font-size: 22px; }
+.gallery-preview-help { text-align: center; color: #68748a; font-size: 13px; line-height: 1.6; }
+.gallery-preview-page { display: grid; gap: 16px; align-items: center; min-height: 240px; }
+.gallery-preview figure { margin: 0; min-width: 0; }
+.gallery-preview img { display: block; width: 100%; height: 65vh; object-fit: contain; border-radius: 8px; }
+.gallery-preview figcaption { text-align: center; font-size: 13px; margin-top: 10px; overflow-wrap: anywhere; }
+.gallery-preview-controls { display: flex; justify-content: center; align-items: center; gap: 24px; margin-top: 20px; }
+.gallery-preview-controls button { border: 1px solid #d6dce8; background: #fff; color: #263247; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 20px; }
+.gallery-preview-controls button:disabled { opacity: .35; cursor: default; }
+.gallery-preview-controls button:focus-visible { outline: 3px solid #4263eb; }

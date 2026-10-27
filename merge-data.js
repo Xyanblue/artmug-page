@@ -9,16 +9,15 @@ function mergeCollection(collectionName) {
     if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
     if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
-    const files = fs.readdirSync(dataDir).filter(file => file.endsWith('.json'));
-    const mergedData = files.map(file => JSON.parse(fs.readFileSync(path.join(dataDir, file))));
-
-    if (collectionName === 'gallery') {
-        mergedData.sort((a, b) => {
-            const timeA = Date.parse(a.updated_at) || 0;
-            const timeB = Date.parse(b.updated_at) || 0;
-            return timeB - timeA;
-        });
-    }
+    const mergedData = collectionName === 'gallery'
+        ? ['vertical', 'horizontal'].flatMap(orientation => {
+            const file = path.join(__dirname, 'content', `gallery-${orientation}.json`);
+            const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+            if (!Array.isArray(data.items)) throw new Error(`${file}: items 배열이 필요합니다.`);
+            return data.items.map(item => ({ ...item, orientation }));
+        })
+        : fs.readdirSync(dataDir).filter(file => file.endsWith('.json'))
+            .map(file => JSON.parse(fs.readFileSync(path.join(dataDir, file), 'utf8')));
 
     fs.writeFileSync(outputFile, JSON.stringify(mergedData));
     console.log(`${collectionName} 병합 완료`);

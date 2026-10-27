@@ -5,42 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Content Manager</title>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <link rel="stylesheet" href="gallery-sortable.css" />
 </head>
 <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     <script>
         CMS.registerPreviewStyle("admin.css");
-        var ReadonlyDateTimeControl = createClass({
-            render: function() {
-                var value = this.props.value;
-                var date = value ? new Date(value) : null;
-                var displayValue = date && !Number.isNaN(date.getTime())
-                    ? new Intl.DateTimeFormat("ko-KR", {
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        second: "2-digit"
-                    }).format(date)
-                    : "저장 시 현재 시각으로 자동 설정됩니다.";
-
-                return h("input", {
-                    id: this.props.forID,
-                    className: this.props.classNameWrapper,
-                    type: "text",
-                    value: displayValue,
-                    readOnly: true,
-                    "aria-readonly": true
-                });
-            }
-        });
-
-        CMS.registerWidget("readonly_datetime", ReadonlyDateTimeControl);
-        CMS.registerEventListener({
-            name: "preSave",
-            handler: ({ entry }) => entry.get("data").set("updated_at", new Date().toISOString())
-        });
+        CMS.registerPreviewStyle("gallery-preview.css?v=1");
     </script>
+    <script src="gallery-sortable.js?v=2"></script>
+    <script src="gallery-preview.js?v=1"></script>
 </body>
 </html>

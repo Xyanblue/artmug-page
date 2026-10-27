@@ -1,3 +1,5 @@
+local_backend: true
+
 backend:
   name: git-gateway
   branch: main
@@ -8,28 +10,47 @@ media_folder: "images/uploads"
 public_folder: "/images/uploads"
 
 collections:
-  - name: "gallery"
-    label: "일러스트 관리"
-    folder: "content/gallery"
-    create: true
-    extension: "json"
-    format: "json"
-    slug: "{{slug}}"
-    fields:
-      - { label: "제목", name: "title", widget: "string" }
-      - { label: "작업물 이미지", name: "image", widget: "image" }
-      - label: "마지막 수정 시각"
-        name: "updated_at"
-        widget: "readonly_datetime"
-        default: "{{now}}"
-        hint: "저장할 때 현재 시각으로 자동 갱신됩니다."
-      - label: "일러스트 방향"
-        name: "orientation"
-        widget: "select"
-        options:
-          - { label: "세로형 일러스트", value: "vertical" }
-          - { label: "가로형 일러스트", value: "horizontal" }
-        default: "vertical"
+  - name: "gallery_vertical"
+    label: "세로형 일러스트 관리"
+    files:
+      - name: "vertical"
+        label: "세로형 작품 편집 및 순서"
+        file: "content/gallery-vertical.json"
+        fields:
+          - name: "items"
+            label: "작품 목록"
+            widget: "list"
+            gallery_sortable: true
+            required: false
+            default: []
+            summary: "{{fields.title}}"
+            collapsed: true
+            fields:
+              - { label: "제목", name: "title", widget: "string" }
+              - { label: "작업물 이미지", name: "image", widget: "image" }
+              - { name: "orientation", widget: "hidden", default: "vertical" }
+              - { name: "updated_at", widget: "hidden", required: false }
+
+  - name: "gallery_horizontal"
+    label: "가로형 일러스트 관리"
+    files:
+      - name: "horizontal"
+        label: "가로형 작품 편집 및 순서"
+        file: "content/gallery-horizontal.json"
+        fields:
+          - name: "items"
+            label: "작품 목록"
+            widget: "list"
+            gallery_sortable: true
+            required: false
+            default: []
+            summary: "{{fields.title}}"
+            collapsed: true
+            fields:
+              - { label: "제목", name: "title", widget: "string" }
+              - { label: "작업물 이미지", name: "image", widget: "image" }
+              - { name: "orientation", widget: "hidden", default: "horizontal" }
+              - { name: "updated_at", widget: "hidden", required: false }
 
   - name: "gallery_settings"
     label: "일러스트 표시 설정"

@@ -82,7 +82,16 @@ async function renderContents(folder, targetId, isVideo = false, gallerySettings
     const root = document.getElementById(targetId);
     try {
         let items;
-        if (isLocalPreview) {
+        if (!isVideo) {
+            const base = isLocalPreview ? 'content' : `https://raw.githubusercontent.com/${USER_NAME}/${REPO_NAME}/main/content`;
+            const groups = await Promise.all(['vertical', 'horizontal'].map(async orientation => {
+                const response = await fetch(`${base}/gallery-${orientation}.json`, { cache: 'no-store' });
+                if (!response.ok) throw new Error('일러스트 목록을 불러오지 못했습니다.');
+                const data = await response.json();
+                return data.items.map(item => ({ ...item, orientation }));
+            }));
+            items = groups.flat();
+        } else if (isLocalPreview) {
             const localRes = await fetch(`data/all-${folder}.json`);
             if (!localRes.ok) throw new Error('로컬 데이터 파일을 찾을 수 없습니다. node merge-data.js를 실행해주세요.');
             items = await localRes.json();
@@ -99,12 +108,6 @@ async function renderContents(folder, targetId, isVideo = false, gallerySettings
         }
 
         if (!isVideo) {
-            items.sort((a, b) => {
-                const timeA = Date.parse(a.updated_at) || 0;
-                const timeB = Date.parse(b.updated_at) || 0;
-                return timeB - timeA;
-            });
-
             const verticalRoot = document.getElementById('vertical-gallery-root');
             const horizontalRoot = document.getElementById('horizontal-gallery-root');
 
